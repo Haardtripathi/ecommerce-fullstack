@@ -18,17 +18,14 @@ const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
-// Connect to MongoDB
-connectDB();
 
 // CORS configuration
 app.use(cors({
-    origin: "https://mellow-sable-3b6e4c.netlify.app",
-    credentials: true,
+    origin: "https://mellow-sable-3b6e4c.netlify.app", // Allowed frontend origin
+    credentials: true, // Required to handle cookies over cross-origin
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));
-
 // Middleware
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -49,7 +46,7 @@ app.use(session({
     cookie: {
         maxAge: 1000 * 60 * 60 * 24, // 24 hours
         httpOnly: true,
-        secure: true,
+        secure: process.env.NODE_ENV === 'production', // Set to true only in production
         sameSite: 'none'
     },
     name: 'my_custom_cookie_name'
@@ -80,10 +77,6 @@ const createUser = async () => {
     }
 };
 
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Credentials', 'true');
-    next();
-});
 // Routes
 app.use('/', authRoutes);
 app.use('/admin', adminRoutes);
