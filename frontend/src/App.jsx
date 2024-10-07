@@ -8,7 +8,9 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignUpPage';
 import AddProductPage from './pages/AddProductPage';
 import ShopPage from './pages/ShopPage';
-// import About from './pages/About';
+import CartPage from './pages/CartPage';
+import AboutPage from './pages/AboutPage';
+import UserPage from './pages/UserPage';
 
 const App = () => {
   return (
@@ -20,7 +22,9 @@ const App = () => {
           <Route index element={<HomePage />} />
           <Route path="/admin/add-product" element={<AddProductPage />} />
           <Route path="/shop" element={<ShopPage />} />
-          {/* <Route path="about" element={<About />} />  */}
+          <Route path='/cart' element={<CartPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/admin/users" element={<UserPage />} />
         </Route>
       </Routes>
     </Router>

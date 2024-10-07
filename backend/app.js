@@ -56,26 +56,24 @@ app.use(session({
 }));
 // Middleware to expose user data in responses
 app.use((req, res, next) => {
-    res.locals.user = req.session.userId || null;
+    res.locals.user = req.session.user || null;
     next();
 });
 
 // Create a user
 const createUser = async () => {
     try {
-        const userExists = await User.findOne({ username: 'admin' }); // Check if user already exists
+        const userExists = await User.findOne({ username: process.env.ADMIN }); // Check if user already exists
         if (!userExists) {
-            const hashedPassword = await bcrypt.hash("admin", 10);
+            const hashedPassword = await bcrypt.hash(process.env.PASSWORD, 10);
             const newUser = new User({
-                username: 'admin',
+                username: process.env.ADMIN,
                 password: hashedPassword,
-                role: 'admin'
+                role: 'admin',
+                mobile: process.env.MOBILE
             });
 
             await newUser.save();
-            console.log('Admin user created:', newUser);
-        } else {
-            console.log('Admin user already exists.');
         }
     } catch (error) {
         console.error('Error creating user:', error);

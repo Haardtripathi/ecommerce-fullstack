@@ -4,9 +4,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import useAuthCheck from "../hooks/useAuthCheck";
 
 const HomePage = () => {
-    const { isAuthenticated, loading } = useAuthCheck();
-    // console.log(isAuthenticated)
-    const navigate = useNavigate()
+    const { isAuthenticated, loading, role } = useAuthCheck();
+    const navigate = useNavigate();
+
     useEffect(() => {
         if (isAuthenticated) {
             navigate('/');
@@ -25,36 +25,53 @@ const HomePage = () => {
         <div className="container mx-auto px-4 py-8">
             <h1 className="text-4xl font-bold text-center mb-6">Welcome to Apna-Bazaar</h1>
             <div className="text-center mb-8">
-                <p className="text-xl text-gray-600 mb-4">Your one-stop shop for all your needs</p>
+                <p className="text-xl text-gray-600 mb-4">Your go-to destination for quality products, all in one place.</p>
             </div>
 
             <div className="max-w-4xl mx-auto">
                 {isAuthenticated ? (
-                    <div className="bg-white p-6 rounded-lg shadow-md">
-                        <h2 className="text-2xl font-semibold mb-4">Welcome back!</h2>
-                        <p className="text-gray-600 mb-4">
-                            Thank you for being a valued member of our community. Start exploring our latest products or check out our special offers.
-                        </p>
-                        <div className="flex justify-center space-x-4">
-                            <Link
-                                to="/shop"
-                                className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition duration-300"
-                            >
-                                Browse Shop
-                            </Link>
-                            <Link
-                                to="/profile"
-                                className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 transition duration-300"
-                            >
-                                View Profile
-                            </Link>
+                    role === 'admin' ? (  // Check if the user is an admin
+                        <div className="bg-white p-6 rounded-lg shadow-md">
+                            <h2 className="text-2xl font-semibold mb-4">Admin Dashboard</h2>
+                            <p className="text-gray-600 mb-4">
+                                Welcome, Admin! Manage products, orders, and users from this dashboard.
+                            </p>
+                            <div className="flex justify-center space-x-4">
+                                <Link
+                                    to="/shop"
+                                    className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition duration-300"
+                                >
+                                    Manage Products
+                                </Link>
+                                <Link
+                                    to="/admin/users"
+                                    className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 transition duration-300"
+                                >
+                                    View Users
+                                </Link>
+                            </div>
                         </div>
-                    </div>
+                    ) : ( // Content for regular authenticated users
+                        <div className="bg-white p-6 rounded-lg shadow-md">
+                            <h2 className="text-2xl font-semibold mb-4">Welcome Back!</h2>
+                            <p className="text-gray-600 mb-4">
+                                We are thrilled to have you with us. Browse our latest products and discover great deals curated just for you.
+                            </p>
+                            <div className="flex justify-center space-x-4">
+                                <Link
+                                    to="/shop"
+                                    className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition duration-300"
+                                >
+                                    Explore Our Shop
+                                </Link>
+                            </div>
+                        </div>
+                    )
                 ) : (
                     <div className="bg-white p-6 rounded-lg shadow-md">
-                        <h2 className="text-2xl font-semibold mb-4">Join Our Community</h2>
+                        <h2 className="text-2xl font-semibold mb-4">Become a Part of Apna-Bazaar</h2>
                         <p className="text-gray-600 mb-4">
-                            Create an account to get started with Apna-Bazaar. Enjoy personalized shopping experiences and exclusive offers.
+                            Join our community for a personalized shopping experience, exclusive deals, and so much more!
                         </p>
                         <div className="flex justify-center space-x-4">
                             <Link
@@ -67,7 +84,7 @@ const HomePage = () => {
                                 to="/signup"
                                 className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 transition duration-300"
                             >
-                                Sign Up
+                                Create an Account
                             </Link>
                         </div>
                     </div>
@@ -75,21 +92,21 @@ const HomePage = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
                     <div className="bg-white p-6 rounded-lg shadow-md">
-                        <h3 className="text-xl font-semibold mb-2">Wide Selection</h3>
+                        <h3 className="text-xl font-semibold mb-2">Exclusive Products</h3>
                         <p className="text-gray-600">
-                            Discover a vast array of products from trusted sellers.
+                            Discover premium, handpicked products that meet your every need.
                         </p>
                     </div>
                     <div className="bg-white p-6 rounded-lg shadow-md">
-                        <h3 className="text-xl font-semibold mb-2">Best Prices</h3>
+                        <h3 className="text-xl font-semibold mb-2">Competitive Prices</h3>
                         <p className="text-gray-600">
-                            Competitive prices and regular deals to save you money.
+                            Enjoy great deals and discounts, helping you save more every time you shop.
                         </p>
                     </div>
                     <div className="bg-white p-6 rounded-lg shadow-md">
-                        <h3 className="text-xl font-semibold mb-2">Fast Delivery</h3>
+                        <h3 className="text-xl font-semibold mb-2">Reliable Delivery</h3>
                         <p className="text-gray-600">
-                            Quick and reliable shipping to your doorstep.
+                            Get your products quickly and securely delivered right to your doorstep.
                         </p>
                     </div>
                 </div>

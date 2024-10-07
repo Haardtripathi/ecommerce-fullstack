@@ -23,7 +23,7 @@ exports.logout = (req, res) => {
 };
 
 exports.postSignup = async (req, res, next) => {
-    const { username, password, confirmPassword } = req.body;
+    const { username, password, mobile, confirmPassword } = req.body;
 
     // Check if passwords match
     if (password !== confirmPassword) {
@@ -36,6 +36,10 @@ exports.postSignup = async (req, res, next) => {
         if (existingUser) {
             return res.status(400).json({ message: "Username already exists." });
         }
+        const mobileExistingUser = await User.findOne({ mobile })
+        if (mobileExistingUser) {
+            return res.status(400).json({ message: "User with this number already exists." });
+        }
 
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -43,7 +47,8 @@ exports.postSignup = async (req, res, next) => {
         const user = new User({
             username,
             password: hashedPassword,
-            role: 'user'
+            role: 'user',
+            mobile
         });
         await user.save();
 

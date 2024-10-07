@@ -9,6 +9,7 @@ const API_URL = "http://localhost:5000";
 const SignupPage = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [mobile, setMobile] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -21,7 +22,11 @@ const SignupPage = () => {
     }, [isAuthenticated, navigate]);
 
     if (loading) {
-        return <div>Loading...</div>;
+        return (
+            <div className="flex justify-center items-center h-96">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500"></div>
+            </div>
+        );
     }
 
     const handleSignup = async (e) => {
@@ -35,11 +40,12 @@ const SignupPage = () => {
         try {
             const response = await axios.post(`${API_URL}/signup`, {
                 username,
+                mobile,
                 password,
                 confirmPassword
             }, { withCredentials: true });
 
-            console.log(response.data.message);
+            // console.log(response.data.message);
             navigate('/login');
         } catch (error) {
             setError(error.response?.data?.message || 'Signup failed');
@@ -59,6 +65,17 @@ const SignupPage = () => {
                             id="username"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
+                            className="border rounded w-full py-2 px-3"
+                            required
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-gray-700 mb-2" htmlFor="mobile">Mobile No</label>
+                        <input
+                            type="number"
+                            id="mobile"
+                            value={mobile}
+                            onChange={(e) => setMobile(e.target.value)}
                             className="border rounded w-full py-2 px-3"
                             required
                         />

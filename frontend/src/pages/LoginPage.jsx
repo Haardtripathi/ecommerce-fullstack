@@ -21,9 +21,12 @@ const LoginPage = () => {
     }, [isAuthenticated, navigate]);
 
     if (loading) {
-        return <div>Loading...</div>;
+        return (
+            <div className="flex justify-center items-center h-96">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500"></div>
+            </div>
+        );
     }
-
     const handleLogin = async (e) => {
         e.preventDefault();
         try {

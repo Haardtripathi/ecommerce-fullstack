@@ -41,7 +41,7 @@ const useAuthCheck = () => {
         };
     }, []);
 
-    return { isAuthenticated, loading, role };
+    return { isAuthenticated, loading, role, setIsAuthenticated };
 };
 
 export default useAuthCheck;    

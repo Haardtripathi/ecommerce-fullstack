@@ -13,18 +13,18 @@ const AddProductPage = () => {
     const [image, setImage] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const fileInputRef = useRef(null); // Create a ref for the file input
+    const fileInputRef = useRef(null);
 
-    const { isAuthenticated, loading, role } = useAuthCheck();
+    const { isAuthenticated, loading: authLoading, role } = useAuthCheck();
 
     useEffect(() => {
-        if (!loading && isAuthenticated && role) {
-            if (role !== "admin") {
-                navigate('/');
-            }
+        if (authLoading) return; // Wait until loading is done
+        if (!isAuthenticated || role !== "admin") {
+            navigate('/'); // Redirect to home or another appropriate page
         }
-    }, [isAuthenticated, loading, navigate, role]);
+    }, [isAuthenticated, authLoading, navigate, role]);
 
     useEffect(() => {
         return () => {
@@ -34,8 +34,13 @@ const AddProductPage = () => {
         };
     }, [imagePreview]);
 
-    if (loading) {
-        return <div>Loading...</div>;
+    // Show loading spinner if the loading state is true
+    if (authLoading) {
+        return (
+            <div className="flex justify-center items-center h-96">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500"></div>
+            </div>
+        );
     }
 
     const handleImageChange = (e) => {
@@ -48,37 +53,55 @@ const AddProductPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        if (!name || !description || !price || !image) {
-            setError('All fields are required.');
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('name', name);
-        formData.append('description', description);
-        formData.append('price', price);
-        formData.append('image', image);
+        setError('');
+        setLoading(true);
 
         try {
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('description', description);
+            formData.append('price', price);
+            formData.append('image', image);
+
             const response = await axios.post(`${API_URL}/admin/add-product`, formData, {
                 headers: {
-                    'Content-Type': 'multipart/form-data'
+                    'Content-Type': 'multipart/form-data',
                 }
             });
-            // Reset form fields
-            setName('');
-            setDescription('');
-            setPrice('');
-            setImage(null);
-            setImagePreview(null);
-            setError('');
-            fileInputRef.current.value = ''; // Clear the file input field
-            alert('Product added successfully!');
+
+            if (response.data && response.data.product) {
+                // Reset form fields
+                setName('');
+                setDescription('');
+                setPrice('');
+                setImage(null);
+                setImagePreview(null);
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                }
+
+                alert('Product added successfully!');
+                navigate('/shop');
+            } else {
+                throw new Error('Invalid response from server');
+            }
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to add product');
+            console.error('Error adding product:', err);
+            setError(err.response?.data?.message || 'Failed to add product. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
+
+
+    // Show loading spinner if the loading state is true
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-96">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -125,7 +148,7 @@ const AddProductPage = () => {
                             accept="image/*"
                             onChange={handleImageChange}
                             className="border rounded w-full py-2 px-3"
-                            ref={fileInputRef} // Attach the ref to the file input
+                            ref={fileInputRef}
                             required
                         />
                     </div>
