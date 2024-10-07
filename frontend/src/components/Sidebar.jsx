@@ -1,11 +1,11 @@
-/* eslint-disable no-unused-vars */
 import React from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import useAuthCheck from "../hooks/useAuthCheck";
 
 const Sidebar = ({ isOpen }) => {
-    const { isAuthenticated, loading, role } = useAuthCheck(); // Include the role
+    const { isAuthenticated, role, logout, loading } = useAuthCheck();
+    
 
     return (
         <div className={`bg-gray-800 h-full transition-all duration-300 ${isOpen ? 'w-64' : 'w-0'} overflow-hidden`}>
@@ -24,21 +24,18 @@ const Sidebar = ({ isOpen }) => {
                                 </Link>
                             </li>
                         )}
-
                         <li>
                             <Link to="/about" className="flex items-center text-gray-300 hover:bg-gray-700 hover:text-white px-4 py-2">
                                 <span className="ml-3">About</span>
                             </Link>
                         </li>
-                        {/* Show Cart link only if the user is authenticated and not an admin */}
-                        {isAuthenticated && role !== "admin" && (
+                        {isAuthenticated && role === "user" && (
                             <li>
                                 <Link to="/cart" className="flex items-center text-gray-300 hover:bg-gray-700 hover:text-white px-4 py-2">
                                     <span className="ml-3">Cart</span>
                                 </Link>
                             </li>
                         )}
-                        {/* Show Add Product link only if the user is an admin */}
                         {isAuthenticated && role === "admin" && (
                             <li>
                                 <Link to="/admin/add-product" className="flex items-center text-gray-300 hover:bg-gray-700 hover:text-white px-4 py-2">
@@ -46,21 +43,32 @@ const Sidebar = ({ isOpen }) => {
                                 </Link>
                             </li>
                         )}
-                        {/* Show Login and Sign Up links only if the user is not authenticated */}
-                        {!isAuthenticated && (
-                            <>
+                        {!loading && (
+                            !isAuthenticated ? (
+                                <>
+                                    <li>
+                                        <Link to="/login" className="flex items-center text-gray-300 hover:bg-gray-700 hover:text-white px-4 py-2">
+                                            <span className="ml-3">Login</span>
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link to="/signup" className="flex items-center text-gray-300 hover:bg-gray-700 hover:text-white px-4 py-2">
+                                            <span className="ml-3">Sign Up</span>
+                                        </Link>
+                                    </li>
+                                </>
+                            ) : (
                                 <li>
-                                    <Link to="/login" className="flex items-center text-gray-300 hover:bg-gray-700 hover:text-white px-4 py-2">
-                                        <span className="ml-3">Login</span>
-                                    </Link>
+                                    <button
+                                        onClick={logout}
+                                        className="flex items-center w-full text-gray-300 hover:bg-gray-700 hover:text-white px-4 py-2"
+                                    >
+                                        <span className="ml-3">Logout</span>
+                                    </button>
                                 </li>
-                                <li>
-                                    <Link to="/signup" className="flex items-center text-gray-300 hover:bg-gray-700 hover:text-white px-4 py-2">
-                                        <span className="ml-3">Sign Up</span>
-                                    </Link>
-                                </li>
-                            </>
+                            )
                         )}
+
                     </ul>
                 </nav>
             </div>

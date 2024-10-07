@@ -6,7 +6,6 @@ exports.isAuthenticated = async (req, res, next) => {
     try {
         if (req.session.userId && req.session.isAuthenticated) {
             const user = await User.findById(req.session.userId);
-            console.log(user)
             if (user) {
                 req.user = user; // Attach user object to req
                 return next();

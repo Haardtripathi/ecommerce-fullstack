@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import axios from '../axiosConfig.js';
 import useAuthCheck from "../hooks/useAuthCheck.js";
 
-const API_URL = "https://ecommerce-fullstack-tvzc.onrender.com"; // Update this when deployed
 
 const ShopPage = () => {
     const [products, setProducts] = useState([]);
@@ -24,7 +23,7 @@ const ShopPage = () => {
         if (!loading && isAuthenticated) {
             const fetchProducts = async () => {
                 try {
-                    const response = await axios.get(`${API_URL}/products`);
+                    const response = await axios.get(`/products`);
                     setProducts(response.data);
                 } catch (error) {
                     console.error('Error fetching products:', error);
@@ -46,7 +45,7 @@ const ShopPage = () => {
     const handleAddToCart = async (productId, quantity) => {
         try {
             // console.log(productId, quantity)
-            const response = await axios.post(`${API_URL}/add-to-cart`, { productId, quantity }, { withCredentials: true });
+            const response = await axios.post(`/add-to-cart`, { productId, quantity }, { withCredentials: true });
             // console.log(response.data.message);
             alert("Added to cart")
         } catch (error) {
@@ -59,7 +58,7 @@ const ShopPage = () => {
         if (window.confirm('Are you sure you want to delete this product?')) {
             try {
                 // console.log(productId);
-                await axios.post(`${API_URL}/admin/delete-product/${productId}`);
+                await axios.post(`/admin/delete-product/${productId}`);
                 setProducts((prevProducts) => prevProducts.filter((product) => product._id !== productId), { withCredentials: true });
                 alert('Product deleted successfully.');
             } catch (error) {

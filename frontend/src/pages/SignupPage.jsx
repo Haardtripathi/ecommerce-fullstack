@@ -4,9 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from '../axiosConfig.js';
 import useAuthCheck from "../hooks/useAuthCheck.js";
 
-const API_URL = "https://ecommerce-fullstack-tvzc.onrender.com";
-
-const SignupPage = () => {
+const SignupPage = ({ setIsAuthenticated }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [mobile, setMobile] = useState('');
@@ -38,15 +36,15 @@ const SignupPage = () => {
         }
 
         try {
-            const response = await axios.post(`${API_URL}/signup`, {
+            const response = await axios.post(`/signup`, {
                 username,
                 mobile,
                 password,
                 confirmPassword
             }, { withCredentials: true });
 
-            // console.log(response.data.message);
-            navigate('/login');
+            // Update authentication state after successful signup
+            navigate('/'); // Navigate to home after successful signup
         } catch (error) {
             setError(error.response?.data?.message || 'Signup failed');
         }

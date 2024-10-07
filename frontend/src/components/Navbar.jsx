@@ -1,23 +1,22 @@
-/* eslint-disable no-unused-vars */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import axios from '../axiosConfig.js';
-import useAuthCheck from "../hooks/useAuthCheck.js";
-
-const API_URL = 'https://ecommerce-fullstack-tvzc.onrender.com';
+import useAuthCheck from '../hooks/useAuthCheck';
 
 const Navbar = ({ toggleSidebar }) => {
-    const { isAuthenticated, loading, role, setIsAuthenticated } = useAuthCheck();
+    const { isAuthenticated, loading, role, logout } = useAuthCheck();
+    console.log(isAuthenticated)
     const navigate = useNavigate();
 
+    useEffect(() => {
+        // Update component state or re-render based on authentication changes
+        // For example, you might update a local state variable to trigger a re-render
+    }, [isAuthenticated, role]);
+
     const handleLogout = async () => {
-        try {
-            await axios.post(`${API_URL}/logout`, {}, { withCredentials: true });
-            setIsAuthenticated(false);  // Update authentication state
-            navigate("/login");  // Navigate to the homepage (or login) after logging out
-        } catch (error) {
-            console.error('Logout failed:', error);
+        const result = await logout();
+        if (result.success) {
+            navigate("/login");
         }
     };
 
@@ -42,12 +41,11 @@ const Navbar = ({ toggleSidebar }) => {
                     )}
                     <Link to="/about" className="text-gray-600 hover:text-blue-500">About</Link>
 
-                    {/* Show Cart link only if the user is not an admin */}
-                    {isAuthenticated && role !== "admin" && (
+                    {isAuthenticated && role === "user" && (
                         <Link to="/cart" className="text-gray-600 hover:text-blue-500">Cart</Link>
                     )}
 
-                    {role === "admin" && (
+                    {isAuthenticated && role === "admin" && (
                         <Link to="/admin/add-product" className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
                             Add Product
                         </Link>
@@ -62,9 +60,14 @@ const Navbar = ({ toggleSidebar }) => {
                                 Logout
                             </button>
                         ) : (
-                            <Link to="/login" className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
-                                Login
-                            </Link>
+                            <>
+                                <Link to="/login" className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+                                    Login
+                                </Link>
+                                <Link to="/signup" className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+                                    Sign Up
+                                </Link>
+                            </>
                         )
                     )}
                 </div>

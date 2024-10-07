@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import axios from '../axiosConfig.js';
 import useAuthCheck from "../hooks/useAuthCheck.js";
 
-const API_URL = "https://ecommerce-fullstack-tvzc.onrender.com";
 
 const AddProductPage = () => {
     const [name, setName] = useState('');
@@ -63,7 +62,7 @@ const AddProductPage = () => {
             formData.append('price', price);
             formData.append('image', image);
 
-            const response = await axios.post(`${API_URL}/admin/add-product`, formData, {
+            const response = await axios.post(`/admin/add-product`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },

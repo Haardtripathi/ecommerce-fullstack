@@ -4,7 +4,6 @@ import axios from '../axiosConfig';
 import useAuthCheck from "../hooks/useAuthCheck";
 import { useNavigate } from 'react-router-dom';
 
-const API_URL = "https://ecommerce-fullstack-tvzc.onrender.com"; // Update this when deployed
 
 const UserPage = () => {
     const [users, setUsers] = useState([]);
@@ -24,7 +23,7 @@ const UserPage = () => {
         const fetchUsers = async () => {
             if (isAuthenticated && role === 'admin') {
                 try {
-                    const response = await axios.get(`${API_URL}/admin/users`, { withCredentials: true });
+                    const response = await axios.get(`/admin/users`, { withCredentials: true });
                     setUsers(response.data);
                 } catch (error) {
                     console.error('Error fetching users:', error);

@@ -1,18 +1,14 @@
-/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from '../axiosConfig.js';
-import useAuthCheck from "../hooks/useAuthCheck.js"
-
-const API_URL = "https://ecommerce-fullstack-tvzc.onrender.com";
+import useAuthCheck from "../hooks/useAuthCheck.js";
 
 const LoginPage = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
-
-    const { isAuthenticated, loading } = useAuthCheck();
+    const { isAuthenticated, loading, checkAuth } = useAuthCheck();
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -27,21 +23,21 @@ const LoginPage = () => {
             </div>
         );
     }
+
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post(`${API_URL}/login`, {
+            await axios.post(`/login`, {
                 username,
                 password,
             }, { withCredentials: true });
 
-            // Navigate to home after successful login
+            await checkAuth();  // This will update the authentication state
             navigate('/');
         } catch (error) {
             setError(error.response?.data?.message || 'Login failed');
         }
     };
-
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -74,7 +70,7 @@ const LoginPage = () => {
                     <button type="submit" className="bg-blue-500 text-white rounded w-full py-2 hover:bg-blue-600">Login</button>
                 </form>
                 <p className="mt-4 text-center">
-                    Do not have an account?{' '}
+                    Don't have an account?{' '}
                     <Link to="/signup" className="text-blue-500">Sign Up</Link>
                 </p>
             </div>

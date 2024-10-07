@@ -1,47 +1,48 @@
 import { useState, useEffect } from 'react';
 import axios from '../axiosConfig';
 
-const API_URL = "https://ecommerce-fullstack-tvzc.onrender.com";
 
 const useAuthCheck = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [role, setRole] = useState("");
     const [loading, setLoading] = useState(true);
 
+    const checkAuth = async () => {
+        try {
+            const response = await axios.get(`/check-auth`, {
+                withCredentials: true
+            });
+            setIsAuthenticated(response.data.isAuthenticated);
+            setRole(response.data.role || '');
+            window.dispatchEvent(new Event('authChange'));
+        } catch (error) {
+            console.error('Auth check failed:', error);
+            setIsAuthenticated(false);
+            setRole('');
+            window.dispatchEvent(new Event('authChange'));
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        let isMounted = true;
-
-        const checkAuth = async () => {
-            try {
-                const response = await axios.get(`${API_URL}/check-auth`, {
-                    withCredentials: true
-                });
-
-                if (isMounted) {
-                    setIsAuthenticated(response.data.isAuthenticated);
-                    setRole(response.data.role || '');
-                }
-            } catch (error) {
-                console.error('Auth check failed:', error);
-                if (isMounted) {
-                    setIsAuthenticated(false);
-                    setRole('');
-                }
-            } finally {
-                if (isMounted) {
-                    setLoading(false);
-                }
-            }
-        };
-
         checkAuth();
-
-        return () => {
-            isMounted = false;
-        };
     }, []);
 
-    return { isAuthenticated, loading, role, setIsAuthenticated };
+    const logout = async () => {
+        try {
+            await axios.post(`/logout`, {}, { withCredentials: true });
+            setIsAuthenticated(false);
+            setRole('');
+            window.dispatchEvent(new Event('authChange'));
+            return { success: true };
+        } catch (error) {
+            console.error('Logout failed:', error);
+            return { success: false, error: error.response?.data?.message || 'Logout failed' };
+        }
+    };
+
+    return { isAuthenticated, loading, role, checkAuth, logout, setIsAuthenticated, setRole };
 };
 
-export default useAuthCheck;    
+export default useAuthCheck;
