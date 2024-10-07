@@ -21,6 +21,7 @@ const app = express();
 // Middleware to expose user data in responses
 app.use((req, res, next) => {
     res.locals.user = req.user || null;
+    console.log(req.user)
     next();
 });
 // CORS configuration
