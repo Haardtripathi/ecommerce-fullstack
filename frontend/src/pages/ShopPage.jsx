@@ -46,7 +46,7 @@ const ShopPage = () => {
     const handleAddToCart = async (productId, quantity) => {
         try {
             // console.log(productId, quantity)
-            const response = await axios.post(`${API_URL}/add-to-cart`, { productId, quantity });
+            const response = await axios.post(`${API_URL}/add-to-cart`, { productId, quantity }, { withCredentials: true });
             // console.log(response.data.message);
             alert("Added to cart")
         } catch (error) {
@@ -60,7 +60,7 @@ const ShopPage = () => {
             try {
                 // console.log(productId);
                 await axios.post(`${API_URL}/admin/delete-product/${productId}`);
-                setProducts((prevProducts) => prevProducts.filter((product) => product._id !== productId));
+                setProducts((prevProducts) => prevProducts.filter((product) => product._id !== productId), { withCredentials: true });
                 alert('Product deleted successfully.');
             } catch (error) {
                 console.error('Error deleting product:', error);

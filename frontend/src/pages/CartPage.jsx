@@ -57,7 +57,7 @@ const CartPage = () => {
             await axios.post(`${API_URL}/update-cart-quantity`, {
                 productId,
                 quantity: newQuantity
-            });
+            }, { withCredentials: true });
 
             const updatedItems = cartItems.map(item =>
                 item.product._id === productId
@@ -73,7 +73,7 @@ const CartPage = () => {
 
     const handleRemoveItem = async (productId) => {
         try {
-            await axios.post(`${API_URL}/remove-from-cart`, { productId });
+            await axios.post(`${API_URL}/remove-from-cart`, { productId }, { withCredentials: true });
             const updatedItems = cartItems.filter(item => item.product._id !== productId);
             setCartItems(updatedItems);
             calculateTotal(updatedItems);
@@ -90,7 +90,7 @@ const CartPage = () => {
         }
 
         try {
-            const { data: orderData } = await axios.post(`${API_URL}/create-razorpay-order`, { total });
+            const { data: orderData } = await axios.post(`${API_URL}/create-razorpay-order`, { total }, { withCredentials: true });
             const options = {
                 key: import.meta.env.REACT_APP_RAZORPAY_KEY,
                 amount: orderData.amount,
@@ -106,7 +106,7 @@ const CartPage = () => {
                             razorpay_signature: response.razorpay_signature
                         };
                         // Verify payment and create order
-                        const verifyRes = await axios.post(`${API_URL}/verify-payment`, paymentData);
+                        const verifyRes = await axios.post(`${API_URL}/verify-payment`, paymentData, { withCredentials: true });
                         alert('Payment successful and order placed!');
                         navigate('/orders'); // Redirect to orders page
                     } catch (error) {

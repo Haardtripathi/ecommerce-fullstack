@@ -21,10 +21,11 @@ const app = express();
 
 // CORS configuration
 app.use(cors({
-    origin: "https://ecomm-frontend-proj1.netlify.app", // Allowed frontend origin
-    credentials: true, // Required to handle cookies over cross-origin
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    origin: "https://ecomm-frontend-proj1.netlify.app",
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+    exposedHeaders: ['Set-Cookie'],
 }));
 // Middleware
 app.use(express.json());
@@ -47,7 +48,8 @@ app.use(session({
         maxAge: 1000 * 60 * 60 * 24, // 24 hours
         httpOnly: true,
         sameSite: 'none',
-        secure: true
+        secure: true,
+        domain: '.netlify.app' // Try this if you're having issues
     },
     name: 'my_custom_cookie_name'
 }));

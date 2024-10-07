@@ -66,7 +66,8 @@ const AddProductPage = () => {
             const response = await axios.post(`${API_URL}/admin/add-product`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
-                }
+                },
+                withCredentials: true
             });
 
             if (response.data && response.data.product) {
