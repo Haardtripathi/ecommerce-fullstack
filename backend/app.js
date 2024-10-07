@@ -4,7 +4,6 @@ const bodyParser = require("body-parser");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const bcrypt = require("bcrypt");
-const csrf = require("csurf");
 const cors = require("cors");
 require('dotenv').config();
 const path = require("path")
@@ -22,30 +21,22 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 
-// Middleware
-const corsOptions = {
-    origin: [
-        "https://ecomm-fullstack-demo1.netlify.app",
-        "https://ecommerce-fullstack-tvzc.onrender.com"
-    ],
+// CORS configuration
+app.use(cors({
+    origin: 'https://ecomm-fullstack-demo1.netlify.app',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    exposedHeaders: ['Content-Range', 'X-Content-Range'],
-    maxAge: 600
-};
+}));
 
-app.use(cors(corsOptions));
-
-
-app.use(express.json()); // Parse JSON requests
-
+// Middleware
+app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // MongoDB Store for sessions
 const store = new MongoDBStore({
-    uri: process.env.MONGODB_URI, // Make sure to set this in your .env file
+    uri: process.env.MONGODB_URI,
     collection: 'sessions'
 });
 
@@ -56,10 +47,10 @@ app.use(session({
     saveUninitialized: false,
     store: store,
     cookie: {
-        maxAge: 1000 * 60 * 30,
+        maxAge: 1000 * 60 * 60 * 24, // 24 hours
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'none' // Changed from 'lax' to 'none' for cross-origin requests
+        secure: true,
+        sameSite: 'none'
     },
     name: 'my_custom_cookie_name'
 }));
@@ -70,10 +61,10 @@ app.use((req, res, next) => {
     next();
 });
 
-// Create a user
+// Create initial admin user
 const createUser = async () => {
     try {
-        const userExists = await User.findOne({ username: process.env.ADMIN }); // Check if user already exists
+        const userExists = await User.findOne({ username: process.env.ADMIN });
         if (!userExists) {
             const hashedPassword = await bcrypt.hash(process.env.PASSWORD, 10);
             const newUser = new User({
@@ -82,7 +73,6 @@ const createUser = async () => {
                 role: 'admin',
                 mobile: process.env.MOBILE
             });
-
             await newUser.save();
         }
     } catch (error) {
@@ -90,18 +80,20 @@ const createUser = async () => {
     }
 };
 
-// Call createUser after connecting to the database
-connectDB().then(() => {
-    createUser();
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Credentials', 'true');
+    next();
 });
-
 // Routes
 app.use('/', authRoutes);
 app.use('/admin', adminRoutes);
 app.use(userRoutes);
 
-// Start server
+// Initialize database and start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+connectDB().then(() => {
+    createUser();
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
 });
