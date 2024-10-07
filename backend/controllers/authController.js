@@ -1,31 +1,28 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 
-const User = require("../models/user");
+const User = require("../models/user")
 
-const JWT_SECRET = process.env.JWT_SECRET; // Store JWT secret in .env
 
 exports.checkAuth = (req, res) => {
-    const token = req.headers.authorization?.split(' ')[1]; // Bearer token
-    if (!token) {
-        return res.status(401).json({ isAuthenticated: false, role: null });
-    }
-
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        return res.json({ isAuthenticated: true, role: decoded.role });
-    } catch (error) {
-        return res.status(401).json({ isAuthenticated: false, role: null });
+    if (req.session && req.session.isAuthenticated) {
+        return res.json({ isAuthenticated: true, role: req.session.role });
+    } else {
+        return res.json({ isAuthenticated: false, role: null });
     }
 };
 
 exports.logout = (req, res) => {
-    // With JWT, logout is handled client-side by simply clearing the token
-    res.json({ message: "Logged out successfully." });
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).json({ message: "Logout failed" });
+        }
+        res.clearCookie('my_custom_cookie_name');
+        res.json({ message: "Logged out successfully" });
+    });
 };
 
-exports.postSignup = async (req, res) => {
+exports.postSignup = async (req, res, next) => {
     const { username, password, mobile, confirmPassword } = req.body;
 
     // Check if passwords match
@@ -39,7 +36,7 @@ exports.postSignup = async (req, res) => {
         if (existingUser) {
             return res.status(400).json({ message: "Username already exists." });
         }
-        const mobileExistingUser = await User.findOne({ mobile });
+        const mobileExistingUser = await User.findOne({ mobile })
         if (mobileExistingUser) {
             return res.status(400).json({ message: "User with this number already exists." });
         }
@@ -60,9 +57,9 @@ exports.postSignup = async (req, res) => {
         console.error(error);
         res.status(500).json({ message: "Internal server error." });
     }
-};
+}
 
-exports.postLogin = async (req, res) => {
+exports.postLogin = async (req, res, next) => {
     const { username, password } = req.body;
 
     try {
@@ -73,16 +70,15 @@ exports.postLogin = async (req, res) => {
             return res.status(401).json({ message: "Invalid username or password." });
         }
 
-        // Generate JWT token
-        const token = jwt.sign(
-            { userId: user._id, role: user.role },
-            JWT_SECRET,
-            { expiresIn: '1h' }
-        );
+        // Set user ID in session
+        req.session.userId = user._id;
+        req.session.role = user.role;
+        req.session.isAuthenticated = true;
 
-        res.status(200).json({ message: "Login successful!", token });
+        res.status(200).json({ message: "Login successful!" });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Internal server error." });
     }
 };
+

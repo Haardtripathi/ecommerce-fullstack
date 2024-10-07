@@ -63,13 +63,9 @@ const AddProductPage = () => {
             formData.append('price', price);
             formData.append('image', image);
 
-            // Get the JWT token from localStorage
-            const token = localStorage.getItem('token');
-
             const response = await axios.post(`${API_URL}/admin/add-product`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
-                    'Authorization': `Bearer ${token}` // Include JWT token
                 },
                 withCredentials: true
             });
@@ -97,6 +93,7 @@ const AddProductPage = () => {
             setLoading(false);
         }
     };
+
 
     // Show loading spinner if the loading state is true
     if (loading) {

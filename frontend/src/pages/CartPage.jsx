@@ -27,13 +27,7 @@ const CartPage = () => {
     useEffect(() => {
         const fetchCart = async () => {
             try {
-                const token = localStorage.getItem('token'); // Retrieve the JWT token
-                const response = await axios.get(`${API_URL}/cart`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}` // Include JWT token in the request
-                    },
-                    withCredentials: true
-                });
+                const response = await axios.get(`${API_URL}/cart`);
                 setCartItems(response.data.items);
                 calculateTotal(response.data.items);
             } catch (err) {
@@ -60,16 +54,10 @@ const CartPage = () => {
         try {
             if (newQuantity < 1) return;
 
-            const token = localStorage.getItem('token'); // Retrieve the JWT token
             await axios.post(`${API_URL}/update-cart-quantity`, {
                 productId,
                 quantity: newQuantity
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${token}` // Include JWT token in the request
-                },
-                withCredentials: true
-            });
+            }, { withCredentials: true });
 
             const updatedItems = cartItems.map(item =>
                 item.product._id === productId
@@ -85,13 +73,7 @@ const CartPage = () => {
 
     const handleRemoveItem = async (productId) => {
         try {
-            const token = localStorage.getItem('token'); // Retrieve the JWT token
-            await axios.post(`${API_URL}/remove-from-cart`, { productId }, {
-                headers: {
-                    'Authorization': `Bearer ${token}` // Include JWT token in the request
-                },
-                withCredentials: true
-            });
+            await axios.post(`${API_URL}/remove-from-cart`, { productId }, { withCredentials: true });
             const updatedItems = cartItems.filter(item => item.product._id !== productId);
             setCartItems(updatedItems);
             calculateTotal(updatedItems);
@@ -108,14 +90,7 @@ const CartPage = () => {
         }
 
         try {
-            const token = localStorage.getItem('token'); // Retrieve the JWT token
-            const { data: orderData } = await axios.post(`${API_URL}/create-razorpay-order`, { total }, {
-                headers: {
-                    'Authorization': `Bearer ${token}` // Include JWT token in the request
-                },
-                withCredentials: true
-            });
-
+            const { data: orderData } = await axios.post(`${API_URL}/create-razorpay-order`, { total }, { withCredentials: true });
             const options = {
                 key: import.meta.env.REACT_APP_RAZORPAY_KEY,
                 amount: orderData.amount,
@@ -131,12 +106,7 @@ const CartPage = () => {
                             razorpay_signature: response.razorpay_signature
                         };
                         // Verify payment and create order
-                        const verifyRes = await axios.post(`${API_URL}/verify-payment`, paymentData, {
-                            headers: {
-                                'Authorization': `Bearer ${token}` // Include JWT token in the request
-                            },
-                            withCredentials: true
-                        });
+                        const verifyRes = await axios.post(`${API_URL}/verify-payment`, paymentData, { withCredentials: true });
                         alert('Payment successful and order placed!');
                         navigate('/orders'); // Redirect to orders page
                     } catch (error) {

@@ -13,25 +13,13 @@ const useAuthCheck = () => {
 
         const checkAuth = async () => {
             try {
-                // Assuming you store the JWT token in localStorage
-                const token = localStorage.getItem('token');
-                if (token) {
-                    const response = await axios.get(`${API_URL}/check-auth`, {
-                        headers: {
-                            Authorization: `Bearer ${token}`, // Add token to headers
-                        },
-                        withCredentials: true
-                    });
+                const response = await axios.get(`${API_URL}/check-auth`, {
+                    withCredentials: true
+                });
 
-                    if (isMounted) {
-                        setIsAuthenticated(response.data.isAuthenticated);
-                        setRole(response.data.role || '');
-                    }
-                } else {
-                    if (isMounted) {
-                        setIsAuthenticated(false);
-                        setRole('');
-                    }
+                if (isMounted) {
+                    setIsAuthenticated(response.data.isAuthenticated);
+                    setRole(response.data.role || '');
                 }
             } catch (error) {
                 console.error('Auth check failed:', error);
@@ -56,4 +44,4 @@ const useAuthCheck = () => {
     return { isAuthenticated, loading, role, setIsAuthenticated };
 };
 
-export default useAuthCheck;
+export default useAuthCheck;    
