@@ -1,12 +1,11 @@
-// controllers/userController.js
-const Product = require('../models/product'); // Assuming you're using a Product model
+const Product = require('../models/product');
 const User = require('../models/user');
 const Order = require('../models/orders');
+const Cart = require('../models/cart'); // Assuming you have a Cart model
 require("dotenv").config();
 
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
-
 
 // Initialize Razorpay instance
 const razorpayInstance = new Razorpay({
@@ -19,9 +18,9 @@ exports.createRazorpayOrder = async (req, res) => {
     const { total } = req.body;
 
     const options = {
-        amount: total * 100, // Amount in paise (multiply by 100 to convert to paise)
+        amount: total * 100, // Amount in paise
         currency: 'INR',
-        receipt: 'receipt_order_74394'
+        receipt: `receipt_order_${Date.now()}` // Use dynamic receipt ID
     };
 
     try {
@@ -38,13 +37,13 @@ exports.verifyPayment = async (req, res) => {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
     const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
-    hmac.update(razorpay_order_id + '|' + razorpay_payment_id);
+    hmac.update(`${razorpay_order_id}|${razorpay_payment_id}`);
     const generatedSignature = hmac.digest('hex');
 
     if (generatedSignature === razorpay_signature) {
         // Payment is verified
         try {
-            const userId = req.user._id; // Assuming you have user info from session or JWT
+            const userId = req.user._id; // Get user ID from JWT
             const cart = await Cart.findOne({ user: userId }).populate('items.productId');
 
             // Transfer cart items to order
@@ -73,31 +72,27 @@ exports.verifyPayment = async (req, res) => {
     }
 };
 
-
-
 // Controller to get all products for the shop page
 exports.getAllProducts = async (req, res) => {
     try {
-        const products = await Product.find(); // Fetch all products from the database
-        // console.log(products)
+        const products = await Product.find(); // Fetch all products
         res.status(200).json(products); // Send products as JSON
     } catch (error) {
+        console.error('Error fetching products:', error);
         res.status(500).json({ message: 'Error fetching products', error });
     }
 };
 
+// Add to cart
 exports.addToCart = async (req, res) => {
     const { productId, quantity } = req.body;
-    // console.log(productId, quantity)
-    // console.log(req.user)
+
     try {
-        const user = await User.findById(req.user._id);
-        // console.log(user)
+        const user = await User.findById(req.user._id); // Get user from JWT
         const cartItemIndex = user.cart.findIndex(item => item.productId.toString() === productId);
-        // console.log(cartItemIndex)
 
         if (cartItemIndex >= 0) {
-            // Product already in cart, update <quantity></quantity>
+            // Product already in cart, update quantity
             user.cart[cartItemIndex].quantity += quantity;
         } else {
             // Add new product to cart
@@ -107,10 +102,12 @@ exports.addToCart = async (req, res) => {
         await user.save();
         res.status(200).json({ message: 'Cart updated successfully', cart: user.cart });
     } catch (error) {
+        console.error('Error updating cart:', error);
         res.status(500).json({ message: 'Error updating cart', error });
     }
 };
 
+// Get cart
 exports.getCart = async (req, res) => {
     try {
         const user = await User.findById(req.user._id).populate('cart.productId');
@@ -122,6 +119,7 @@ exports.getCart = async (req, res) => {
 
         res.status(200).json({ items });
     } catch (error) {
+        console.error('Error fetching cart:', error);
         res.status(500).json({ message: 'Error fetching cart', error: error.message });
     }
 };
@@ -137,10 +135,12 @@ exports.removeFromCart = async (req, res) => {
         await user.save();
         res.status(200).json({ message: 'Item removed from cart', cart: user.cart });
     } catch (error) {
+        console.error('Error removing item from cart:', error);
         res.status(500).json({ message: 'Error removing item from cart', error });
     }
 };
 
+// Update cart quantity
 exports.updateCartQuantity = async (req, res) => {
     const { productId, quantity } = req.body;
 
@@ -161,6 +161,7 @@ exports.updateCartQuantity = async (req, res) => {
             res.status(404).json({ message: 'Product not found in cart' });
         }
     } catch (error) {
+        console.error('Error updating cart quantity:', error);
         res.status(500).json({ message: 'Error updating cart quantity', error });
     }
 };

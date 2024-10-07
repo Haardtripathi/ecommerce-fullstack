@@ -4,11 +4,9 @@ const User = require('../models/user');
 const cloudinary = require('../config/cloudinary');
 const fs = require('fs');
 
-
-exports.getAddProduct = async (req, res, next) => {
+exports.getAddProduct = async (req, res) => {
     return res.json({ message: "Add Product Page" });
 }
-
 
 exports.postAddProduct = async (req, res) => {
     let uploadedImage = null;
@@ -18,6 +16,12 @@ exports.postAddProduct = async (req, res) => {
 
         if (!req.file) {
             return res.status(400).json({ message: 'Image file is required' });
+        }
+
+        // Check if the user is authenticated
+        const user = req.user; // Assuming req.user is populated with the authenticated user's data
+        if (!user || !user.isAuthenticated) {
+            return res.status(403).json({ message: 'Access denied. User is not authenticated.' });
         }
 
         // Upload the image to Cloudinary
@@ -37,9 +41,7 @@ exports.postAddProduct = async (req, res) => {
         await product.save();
 
         // Clean up the local file
-        if (fs.existsSync(req.file.path)) {
-            fs.unlinkSync(req.file.path);
-        }
+        fs.unlinkSync(req.file.path);
 
         return res.status(201).json({
             message: 'Product added successfully',
@@ -75,17 +77,18 @@ exports.postAddProduct = async (req, res) => {
     }
 };
 
-
-
-exports.postDeleteProduct = async (req, res, next) => {
+exports.postDeleteProduct = async (req, res) => {
     const productId = req.params.id;
-    // console.log(productId);
 
     try {
+        // Check if the user is authenticated
+        const user = req.user; // Assuming req.user is populated with the authenticated user's data
+        if (!user || !user.isAuthenticated) {
+            return res.status(403).json({ message: 'Access denied. User is not authenticated.' });
+        }
+
         // Find the product by ID
         const product = await Product.findById(productId);
-        // console.log(product);
-
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }

@@ -1,13 +1,16 @@
-
-// Middleware for session-based authentication
 const User = require('../models/user'); // Import the User model
+
+const getUserById = async (userId) => {
+    return await User.findById(userId);
+};
 
 exports.isAuthenticated = async (req, res, next) => {
     try {
-        if (req.session.userId && req.session.isAuthenticated) {
-            const user = await User.findById(req.session.userId);
-            console.log(user)
-            if (user) {
+        const userId = req.headers['x-user-id'] || req.params.userId;
+
+        if (userId) {
+            const user = await getUserById(userId);
+            if (user && user.isAuthenticated) {
                 req.user = user; // Attach user object to req
                 return next();
             }
@@ -20,9 +23,11 @@ exports.isAuthenticated = async (req, res, next) => {
 
 exports.isNotAdmin = async (req, res, next) => {
     try {
-        if (req.session.userId && req.session.isAuthenticated) {
-            const user = await User.findById(req.session.userId);
-            if (user.role !== "admin") {
+        const userId = req.headers['x-user-id'] || req.params.userId;
+
+        if (userId) {
+            const user = await getUserById(userId);
+            if (user && user.isAuthenticated && user.role !== "admin") {
                 return next();
             }
         }
@@ -34,9 +39,11 @@ exports.isNotAdmin = async (req, res, next) => {
 
 exports.isAdmin = async (req, res, next) => {
     try {
-        if (req.session.userId && req.session.isAuthenticated) {
-            const user = await User.findById(req.session.userId);
-            if (user.role === "admin") {
+        const userId = req.headers['x-user-id'] || req.params.userId;
+
+        if (userId) {
+            const user = await getUserById(userId);
+            if (user && user.isAuthenticated && user.role === "admin") {
                 return next();
             }
         }

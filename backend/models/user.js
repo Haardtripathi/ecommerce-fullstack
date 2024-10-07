@@ -33,7 +33,11 @@ const userSchema = new mongoose.Schema({
                 default: 1
             }
         }
-    ]
+    ],
+    isAuthenticated: {
+        type: Boolean,
+        default: false
+    }
 });
 
 const User = mongoose.model('User', userSchema);

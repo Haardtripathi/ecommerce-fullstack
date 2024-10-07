@@ -1,14 +1,12 @@
 const express = require('express');
 const connectDB = require('./config/db');
 const bodyParser = require("body-parser");
-const session = require("express-session");
-const MongoDBStore = require("connect-mongodb-session")(session);
 const bcrypt = require("bcrypt");
 const cors = require("cors");
 require('dotenv').config();
-const path = require("path")
+const path = require("path");
 
-const config = require("./config/config")
+const config = require("./config/config");
 
 // Import User model
 const User = require('./models/user');
@@ -19,7 +17,6 @@ const adminRoutes = require('./routes/adminRoutes');
 const userRoutes = require('./routes/userRoutes');
 
 const app = express();
-
 
 // CORS configuration
 app.use(cors({
@@ -33,39 +30,20 @@ app.use((req, res, next) => {
     next();
 });
 
-// MongoDB Store for sessions
-const store = new MongoDBStore({
-    uri: process.env.MONGODB_URI,
-    collection: 'sessions'
-});
-
-
-app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    store: store,
-    cookie: {
-        maxAge: 1000 * 60 * 60 * 24, // 24 hours
-        httpOnly: true,
-        secure: true, // Always true since you're using HTTPS
-        sameSite: 'none', // Required for cross-site cookies
-        domain: config.NODE_ENV === 'production' ? '.onrender.com' : 'localhost',
-        path: "/"
-    },
-    name: 'my_custom_cookie_name'
-}));
-
 // Middleware
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-
-
-// Middleware to expose user data in responses
-app.use((req, res, next) => {
-    res.locals.user = req.session.user || null;
+// Expose user data in responses (this logic might need updates depending on how you're retrieving user data)
+app.use(async (req, res, next) => {
+    if (req.headers.authorization) {
+        const username = req.headers.authorization.split(' ')[1]; // Assuming you'll pass username in the authorization header
+        const user = await User.findOne({ username });
+        if (user) {
+            req.user = user; // Attach user to req if found
+        }
+    }
     next();
 });
 
@@ -79,7 +57,8 @@ const createUser = async () => {
                 username: process.env.ADMIN,
                 password: hashedPassword,
                 role: 'admin',
-                mobile: process.env.MOBILE
+                mobile: process.env.MOBILE,
+                isAuthenticated: true // Admin user is automatically authenticated
             });
             await newUser.save();
         }
