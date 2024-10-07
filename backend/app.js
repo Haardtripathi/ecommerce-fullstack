@@ -48,7 +48,6 @@ app.use(session({
     store: store,
     cookie: {
         maxAge: 1000 * 60 * 60 * 24, // 24 hours
-        httpOnly: true,
         secure: true, // Set to true only in production
         sameSite: 'none', // Adjust as needed
         domain: process.env.NODE_ENV === 'production' ? '.netlify.app' : 'localhost',
