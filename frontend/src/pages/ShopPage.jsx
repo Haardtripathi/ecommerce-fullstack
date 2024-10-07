@@ -8,7 +8,6 @@ const API_URL = "https://ecommerce-fullstack-tvzc.onrender.com"; // Update this 
 
 const ShopPage = () => {
     const [products, setProducts] = useState([]);
-    const [cart, setCart] = useState({});
     const { isAuthenticated, loading, role } = useAuthCheck();
     const navigate = useNavigate();
 
@@ -24,10 +23,20 @@ const ShopPage = () => {
         if (!loading && isAuthenticated) {
             const fetchProducts = async () => {
                 try {
-                    const response = await axios.get(`${API_URL}/products`);
+                    const token = localStorage.getItem('token'); // Get the token from local storage
+                    const response = await axios.get(`${API_URL}/products`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`, // Include the token in the headers
+                        },
+                    });
                     setProducts(response.data);
                 } catch (error) {
                     console.error('Error fetching products:', error);
+                    // Handle unauthorized access
+                    if (error.response?.status === 401) {
+                        alert('Session expired. Please log in again.');
+                        navigate('/login');
+                    }
                 }
             };
 
@@ -45,30 +54,46 @@ const ShopPage = () => {
 
     const handleAddToCart = async (productId, quantity) => {
         try {
-            // console.log(productId, quantity)
-            const response = await axios.post(`${API_URL}/add-to-cart`, { productId, quantity }, { withCredentials: true });
-            // console.log(response.data.message);
-            alert("Added to cart")
+            const token = localStorage.getItem('token'); // Get the token from local storage
+            await axios.post(`${API_URL}/add-to-cart`, { productId, quantity }, {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Include the token in the headers
+                },
+            });
+            alert("Added to cart");
         } catch (error) {
             console.error('Error adding to cart:', error);
-        }
-    };
-
-
-    const handleDeleteProduct = async (productId) => {
-        if (window.confirm('Are you sure you want to delete this product?')) {
-            try {
-                // console.log(productId);
-                await axios.post(`${API_URL}/admin/delete-product/${productId}`);
-                setProducts((prevProducts) => prevProducts.filter((product) => product._id !== productId), { withCredentials: true });
-                alert('Product deleted successfully.');
-            } catch (error) {
-                console.error('Error deleting product:', error);
-                alert('Failed to delete product.');
+            // Handle unauthorized access
+            if (error.response?.status === 401) {
+                alert('Session expired. Please log in again.');
+                navigate('/login');
             }
         }
     };
 
+    const handleDeleteProduct = async (productId) => {
+        if (window.confirm('Are you sure you want to delete this product?')) {
+            try {
+                const token = localStorage.getItem('token'); // Get the token from local storage
+                await axios.post(`${API_URL}/admin/delete-product/${productId}`, {}, {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Include the token in the headers
+                    },
+                });
+                setProducts((prevProducts) => prevProducts.filter((product) => product._id !== productId));
+                alert('Product deleted successfully.');
+            } catch (error) {
+                console.error('Error deleting product:', error);
+                // Handle unauthorized access
+                if (error.response?.status === 401) {
+                    alert('Session expired. Please log in again.');
+                    navigate('/login');
+                } else {
+                    alert('Failed to delete product.');
+                }
+            }
+        }
+    };
 
     return (
         <div className="p-8 bg-gray-100 min-h-screen">
@@ -76,7 +101,7 @@ const ShopPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {products.map((product) => (
                     <div key={product._id} className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col">
-                        <div className="relative pt-[100%] border-2 border-gray-200 rounded-lg"> {/* Added border */}
+                        <div className="relative pt-[100%] border-2 border-gray-200 rounded-lg">
                             <img
                                 src={product.imageUrl}
                                 alt={product.name}
@@ -104,16 +129,13 @@ const ShopPage = () => {
                                     </button>
                                 </div>
                             )}
-
                             {role === 'admin' && (
-                                <>
-                                    <button
-                                        onClick={() => handleDeleteProduct(product._id)}
-                                        className="bg-red-500 text-white rounded px-4 py-2 hover:bg-red-600"
-                                    >
-                                        Delete Product
-                                    </button>
-                                </>
+                                <button
+                                    onClick={() => handleDeleteProduct(product._id)}
+                                    className="bg-red-500 text-white rounded px-4 py-2 hover:bg-red-600"
+                                >
+                                    Delete Product
+                                </button>
                             )}
                         </div>
                     </div>

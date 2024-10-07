@@ -1,11 +1,24 @@
 /* eslint-disable no-unused-vars */
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import useAuthCheck from "../hooks/useAuthCheck";
+import axios from '../axiosConfig';
 
 const Sidebar = ({ isOpen }) => {
-    const { isAuthenticated, loading, role } = useAuthCheck(); // Include the role
+    const { isAuthenticated, loading, role, setIsAuthenticated } = useAuthCheck();
+    const navigate = useNavigate(); // useNavigate hook for navigation
+
+    const handleLogout = async () => {
+        try {
+            await axios.post(`${API_URL}/logout`, {}, { withCredentials: true });
+            localStorage.removeItem('token'); // Remove the token from local storage
+            setIsAuthenticated(false); // Update authentication state
+            navigate("/login"); // Navigate to login after logout
+        } catch (error) {
+            console.error('Logout failed:', error);
+        }
+    };
 
     return (
         <div className={`bg-gray-800 h-full transition-all duration-300 ${isOpen ? 'w-64' : 'w-0'} overflow-hidden`}>
@@ -24,7 +37,6 @@ const Sidebar = ({ isOpen }) => {
                                 </Link>
                             </li>
                         )}
-
                         <li>
                             <Link to="/about" className="flex items-center text-gray-300 hover:bg-gray-700 hover:text-white px-4 py-2">
                                 <span className="ml-3">About</span>
@@ -47,7 +59,7 @@ const Sidebar = ({ isOpen }) => {
                             </li>
                         )}
                         {/* Show Login and Sign Up links only if the user is not authenticated */}
-                        {!isAuthenticated && (
+                        {!isAuthenticated ? (
                             <>
                                 <li>
                                     <Link to="/login" className="flex items-center text-gray-300 hover:bg-gray-700 hover:text-white px-4 py-2">
@@ -60,6 +72,15 @@ const Sidebar = ({ isOpen }) => {
                                     </Link>
                                 </li>
                             </>
+                        ) : (
+                            <li>
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex items-center text-gray-300 hover:bg-gray-700 hover:text-white px-4 py-2 w-full text-left"
+                                >
+                                    <span className="ml-3">Logout</span>
+                                </button>
+                            </li>
                         )}
                     </ul>
                 </nav>

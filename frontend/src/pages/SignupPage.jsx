@@ -42,10 +42,13 @@ const SignupPage = () => {
                 username,
                 mobile,
                 password,
-                confirmPassword
             }, { withCredentials: true });
 
-            // console.log(response.data.message);
+            // Store the token if received
+            if (response.data.token) {
+                localStorage.setItem('token', response.data.token); // Save token in localStorage
+            }
+
             navigate('/login');
         } catch (error) {
             setError(error.response?.data?.message || 'Signup failed');

@@ -14,8 +14,9 @@ const Navbar = ({ toggleSidebar }) => {
     const handleLogout = async () => {
         try {
             await axios.post(`${API_URL}/logout`, {}, { withCredentials: true });
+            localStorage.removeItem('token'); // Remove the token from local storage
             setIsAuthenticated(false);  // Update authentication state
-            navigate("/login");  // Navigate to the homepage (or login) after logging out
+            navigate("/login");  // Navigate to the login page after logging out
         } catch (error) {
             console.error('Logout failed:', error);
         }

@@ -1,47 +1,55 @@
+const jwt = require("jsonwebtoken");
+const User = require("../models/user");
 
-// Middleware for session-based authentication
-const User = require('../models/user'); // Import the User model
+const JWT_SECRET = process.env.JWT_SECRET;
 
 exports.isAuthenticated = async (req, res, next) => {
-    try {
-        if (req.session.userId && req.session.isAuthenticated) {
-            const user = await User.findById(req.session.userId);
-            console.log(user)
-            if (user) {
-                req.user = user; // Attach user object to req
-                return next();
-            }
-        }
+    const token = req.headers.authorization?.split(' ')[1]; // Bearer token
+    if (!token) {
         return res.status(401).json({ message: 'Unauthorized access' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = await User.findById(decoded.userId); // Attach user to req
+        next();
     } catch (error) {
-        return res.status(500).json({ message: 'Internal Server Error' });
+        return res.status(401).json({ message: 'Invalid token' });
     }
 };
 
 exports.isNotAdmin = async (req, res, next) => {
-    try {
-        if (req.session.userId && req.session.isAuthenticated) {
-            const user = await User.findById(req.session.userId);
-            if (user.role !== "admin") {
-                return next();
-            }
-        }
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
         return res.status(401).json({ message: 'Unauthorized access' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        if (decoded.role !== 'admin') {
+            req.user = await User.findById(decoded.userId);
+            return next();
+        }
+        return res.status(403).json({ message: 'Access denied' });
     } catch (error) {
-        return res.status(500).json({ message: 'Internal Server Error' });
+        return res.status(401).json({ message: 'Invalid token' });
     }
 };
 
 exports.isAdmin = async (req, res, next) => {
-    try {
-        if (req.session.userId && req.session.isAuthenticated) {
-            const user = await User.findById(req.session.userId);
-            if (user.role === "admin") {
-                return next();
-            }
-        }
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
         return res.status(401).json({ message: 'Unauthorized access' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        if (decoded.role === 'admin') {
+            req.user = await User.findById(decoded.userId);
+            return next();
+        }
+        return res.status(403).json({ message: 'Access denied' });
     } catch (error) {
-        return res.status(500).json({ message: 'Internal Server Error' });
+        return res.status(401).json({ message: 'Invalid token' });
     }
 };
