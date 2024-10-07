@@ -23,7 +23,7 @@ connectDB();
 
 // CORS configuration
 app.use(cors({
-    origin: 'https://ecomm-fullstack-demo1.netlify.app',
+    origin: "https://mellow-sable-3b6e4c.netlify.app",
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
