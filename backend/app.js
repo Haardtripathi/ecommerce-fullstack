@@ -4,9 +4,9 @@ const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
 const cors = require("cors");
 require('dotenv').config();
-const path = require("path");
+const path = require("path")
 
-const config = require("./config/config");
+const config = require("./config/config")
 
 // Import User model
 const User = require('./models/user');
@@ -18,6 +18,11 @@ const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
+// Middleware to expose user data in responses
+app.use((req, res, next) => {
+    res.locals.user = req.user || null;
+    next();
+});
 // CORS configuration
 app.use(cors({
     origin: config.FRONTEND_URL,
@@ -30,22 +35,15 @@ app.use((req, res, next) => {
     next();
 });
 
+
 // Middleware
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Expose user data in responses (this logic might need updates depending on how you're retrieving user data)
-app.use(async (req, res, next) => {
-    if (req.headers.authorization) {
-        const username = req.headers.authorization.split(' ')[1]; // Assuming you'll pass username in the authorization header
-        const user = await User.findOne({ username });
-        if (user) {
-            req.user = user; // Attach user to req if found
-        }
-    }
-    next();
-});
+
+
+
 
 // Create initial admin user
 const createUser = async () => {
@@ -58,7 +56,7 @@ const createUser = async () => {
                 password: hashedPassword,
                 role: 'admin',
                 mobile: process.env.MOBILE,
-                isAuthenticated: true // Admin user is automatically authenticated
+                isAuthenticated: true
             });
             await newUser.save();
         }
