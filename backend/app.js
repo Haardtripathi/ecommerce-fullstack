@@ -23,7 +23,7 @@ const app = express();
 
 // CORS configuration
 app.use(cors({
-    origin: 'http://localhost:3000', // Allow only your frontend
+    origin: 'https://demo1-ecomm-fullstack.netlify.app', // Allow only your frontend
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -51,7 +51,7 @@ app.use(session({
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production', // Set to true only in production
         sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Adjust as needed
-        domain: process.env.NODE_ENV === 'production' ? '.onrender.com' : 'localhost',
+        domain: process.env.NODE_ENV === 'production' ? '.netlify.app' : 'localhost',
         path: "/"
     },
     name: 'my_custom_cookie_name'
