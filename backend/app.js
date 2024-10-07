@@ -48,9 +48,10 @@ app.use(session({
     store: store,
     cookie: {
         maxAge: 1000 * 60 * 60 * 24, // 24 hours
+        httpOnly: true, // Set to true to make the cookie inaccessible to JavaScript
         secure: true, // Set to true only in production
         sameSite: 'none', // Adjust as needed
-        domain: process.env.NODE_ENV === 'production' ? '.netlify.app' : 'localhost',
+        domain: '.netlify.app',
         path: "/"
     },
     name: 'my_custom_cookie_name'
