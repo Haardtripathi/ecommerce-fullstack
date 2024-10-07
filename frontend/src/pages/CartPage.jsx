@@ -5,7 +5,7 @@ import axios from '../axiosConfig.js';
 import useAuthCheck from "../hooks/useAuthCheck.js";
 import { loadRazorpayScript } from '../utils/razorpayHelper';
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://ecommerce-fullstack-tvzc.onrender.com";
 
 const CartPage = () => {
     const [cartItems, setCartItems] = useState([]);

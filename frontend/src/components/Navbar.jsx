@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import axios from '../axiosConfig.js';
 import useAuthCheck from "../hooks/useAuthCheck.js";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://ecommerce-fullstack-tvzc.onrender.com";
 
 const Navbar = ({ toggleSidebar }) => {
     const { isAuthenticated, loading, role, setIsAuthenticated } = useAuthCheck();

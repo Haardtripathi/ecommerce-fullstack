@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from '../axiosConfig';
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://ecommerce-fullstack-tvzc.onrender.com";
 
 const useAuthCheck = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
