@@ -82,6 +82,7 @@ exports.postLogin = async (req, res) => {
 
         // Set user as authenticated
         user.isAuthenticated = true; // Set isAuthenticated to true
+        req.locals.user = user;
         await user.save();
 
         res.status(200).json({ message: "Login successful!" });
