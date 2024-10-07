@@ -21,7 +21,7 @@ const app = express();
 
 // CORS configuration
 app.use(cors({
-    origin: "https://ecomm-frontend-proj1.netlify.app", // Allowed frontend origin
+    origin: "https://ecommerce-fullstack-frontend-1.onrender.com", // Allowed frontend origin
     credentials: true, // Required to handle cookies over cross-origin
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
