@@ -13,9 +13,17 @@ const useAuthCheck = () => {
 
         const checkAuth = async () => {
             try {
-                const response = await axios.get(`${API_URL}/check-auth`, {
-                    withCredentials: true
-                });
+                const username = localStorage.getItem('username');
+                if (!username) {
+                    if (isMounted) {
+                        setIsAuthenticated(false);
+                        setRole('');
+                        setLoading(false);
+                    }
+                    return;
+                }
+
+                const response = await axios.get(`${API_URL}/check-auth?username=${username}`);
 
                 if (isMounted) {
                     setIsAuthenticated(response.data.isAuthenticated);
@@ -44,4 +52,4 @@ const useAuthCheck = () => {
     return { isAuthenticated, loading, role, setIsAuthenticated };
 };
 
-export default useAuthCheck;    
+export default useAuthCheck;

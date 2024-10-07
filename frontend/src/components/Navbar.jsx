@@ -15,7 +15,7 @@ const Navbar = ({ toggleSidebar }) => {
         try {
             await axios.post(`${API_URL}/logout`, {}, { withCredentials: true });
             setIsAuthenticated(false);  // Update authentication state
-            navigate("/login");  // Navigate to the homepage (or login) after logging out
+            navigate("/login");  // Navigate to the homepage (or login) after loggin g out
         } catch (error) {
             console.error('Logout failed:', error);
         }

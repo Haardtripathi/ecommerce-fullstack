@@ -4,77 +4,87 @@ const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
 const cors = require("cors");
 require('dotenv').config();
-const path = require("path")
+const path = require("path");
 
-const config = require("./config/config")
+const config = require("./config/config");
 
 // Import User model
 const User = require('./models/user');
 
-// Routes directory
+// Routes
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
-// Middleware to expose user data in responses
-app.use((req, res, next) => {
-    res.locals.user = req.user || null;
-    console.log(req.user)
-    next();
-});
 // CORS configuration
 app.use(cors({
     origin: config.FRONTEND_URL,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type'],
 }));
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Credentials', 'true');
-    next();
-});
-
 
 // Middleware
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-
-
-
-
 // Create initial admin user
-const createUser = async () => {
+const createAdminUser = async () => {
     try {
-        const userExists = await User.findOne({ username: process.env.ADMIN });
-        if (!userExists) {
+        const adminExists = await User.findOne({ username: process.env.ADMIN });
+        if (!adminExists) {
             const hashedPassword = await bcrypt.hash(process.env.PASSWORD, 10);
-            const newUser = new User({
+            const newAdmin = new User({
                 username: process.env.ADMIN,
                 password: hashedPassword,
                 role: 'admin',
                 mobile: process.env.MOBILE,
-                isAuthenticated: true
+                isAuthenticated: false  // Start as not authenticated
             });
-            await newUser.save();
+            await newAdmin.save();
+            console.log('Admin user created successfully');
         }
     } catch (error) {
-        console.error('Error creating user:', error);
+        console.error('Error creating admin user:', error);
     }
 };
 
-// Routes
+// Routes setup
 app.use('/', authRoutes);
-app.use('/admin', adminRoutes);
-app.use(userRoutes);
+
+// Basic authentication middleware for protected routes
+const basicAuthMiddleware = async (req, res, next) => {
+    const username = req.headers['x-username'] || req.params;
+
+    if (!username) {
+        return res.status(401).json({ message: 'Authentication required' });
+    }
+
+    try {
+        const user = await User.findOne({ username, isAuthenticated: true });
+        if (!user) {
+            return res.status(401).json({ message: 'Not authenticated' });
+        }
+
+        req.user = user;
+        next();
+    } catch (error) {
+        console.error('Auth middleware error:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+// Apply basic auth middleware to protected routes
+app.use('/admin', basicAuthMiddleware, adminRoutes);
+app.use('/', basicAuthMiddleware, userRoutes);
 
 // Initialize database and start server
 const PORT = process.env.PORT || 5000;
 connectDB().then(() => {
-    createUser();
+    createAdminUser();
     app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
     });

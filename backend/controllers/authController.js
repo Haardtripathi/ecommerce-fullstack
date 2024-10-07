@@ -4,7 +4,12 @@ const User = require("../models/user");
 
 exports.checkAuth = async (req, res) => {
     try {
-        const user = await User.findById(req.user._id); // Assuming req.user is populated with authenticated user's data
+        const { username } = req.query;
+        if (!username) {
+            return res.json({ isAuthenticated: false, role: null });
+        }
+
+        const user = await User.findOne({ username });
         if (user && user.isAuthenticated) {
             return res.json({ isAuthenticated: true, role: user.role });
         } else {
@@ -18,28 +23,53 @@ exports.checkAuth = async (req, res) => {
 
 exports.logout = async (req, res) => {
     try {
-        const user = await User.findById(req.user._id); // Assuming req.user is populated
+        const { username } = req.body;
+        const user = await User.findOne({ username });
+
         if (user) {
-            user.isAuthenticated = false; // Set the user's isAuthenticated to false
+            user.isAuthenticated = false;
             await user.save();
+            return res.json({ message: "Logged out successfully" });
         }
-        res.json({ message: "Logged out successfully" });
+        return res.status(404).json({ message: "User not found" });
     } catch (err) {
         console.error('Logout error:', err);
         return res.status(500).json({ message: "Logout failed" });
     }
 };
 
+exports.postLogin = async (req, res) => {
+    const { username, password } = req.body;
+
+    try {
+        const user = await User.findOne({ username });
+
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            return res.status(401).json({ message: "Invalid username or password." });
+        }
+
+        user.isAuthenticated = true;
+        await user.save();
+
+        res.status(200).json({
+            message: "Login successful!",
+            username: user.username,
+            role: user.role
+        });
+    } catch (error) {
+        console.error('Error during login:', error);
+        res.status(500).json({ message: "Internal server error." });
+    }
+};
+
 exports.postSignup = async (req, res) => {
     const { username, password, mobile, confirmPassword } = req.body;
 
-    // Check if passwords match
     if (password !== confirmPassword) {
         return res.status(400).json({ message: "Passwords do not match." });
     }
 
     try {
-        // Check if the user already exists
         const existingUser = await User.findOne({ username });
         if (existingUser) {
             return res.status(400).json({ message: "Username already exists." });
@@ -50,7 +80,6 @@ exports.postSignup = async (req, res) => {
             return res.status(400).json({ message: "User with this number already exists." });
         }
 
-        // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const user = new User({
@@ -58,36 +87,17 @@ exports.postSignup = async (req, res) => {
             password: hashedPassword,
             role: 'user',
             mobile,
-            isAuthenticated: true // Set isAuthenticated to true upon signup
+            isAuthenticated: true
         });
         await user.save();
 
-        res.status(201).json({ message: "User created successfully." });
+        res.status(201).json({
+            message: "User created successfully.",
+            username: user.username,
+            role: user.role
+        });
     } catch (error) {
         console.error('Error during signup:', error);
-        res.status(500).json({ message: "Internal server error." });
-    }
-};
-
-exports.postLogin = async (req, res) => {
-    const { username, password } = req.body;
-
-    try {
-        const user = await User.findOne({ username });
-
-        // Check if user exists and verify password
-        if (!user || !(await bcrypt.compare(password, user.password))) {
-            return res.status(401).json({ message: "Invalid username or password." });
-        }
-
-        // Set user as authenticated
-        user.isAuthenticated = true; // Set isAuthenticated to true
-        req.locals.user = user;
-        await user.save();
-
-        res.status(200).json({ message: "Login successful!" });
-    } catch (error) {
-        console.error('Error during login:', error);
         res.status(500).json({ message: "Internal server error." });
     }
 };
