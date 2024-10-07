@@ -47,7 +47,8 @@ app.use(session({
         maxAge: 1000 * 60 * 60 * 24, // 24 hours
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production', // Set to true only in production
-        sameSite: 'none'
+        sameSite: 'none',
+        secure: true
     },
     name: 'my_custom_cookie_name'
 }));
