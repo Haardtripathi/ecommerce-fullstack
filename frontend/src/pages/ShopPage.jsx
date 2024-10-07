@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from '../axiosConfig.js';
 import useAuthCheck from "../hooks/useAuthCheck.js";
 
-const API_URL = "https://ecommerce-fullstack-tvzc.onrender.com"; // Update this when deployed
+const API_URL = "https://ecommerce-fullstack-1-dsid.onrender.com"; // Update this when deployed
 
 const ShopPage = () => {
     const [products, setProducts] = useState([]);

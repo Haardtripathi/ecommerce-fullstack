@@ -4,7 +4,7 @@ import axios from '../axiosConfig';
 import useAuthCheck from "../hooks/useAuthCheck";
 import { useNavigate } from 'react-router-dom';
 
-const API_URL = "https://ecommerce-fullstack-tvzc.onrender.com"; // Update this when deployed
+const API_URL = "https://ecommerce-fullstack-1-dsid.onrender.com"; // Update this when deployed
 
 const UserPage = () => {
     const [users, setUsers] = useState([]);
