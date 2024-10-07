@@ -23,10 +23,20 @@ const app = express();
 connectDB();
 
 // Middleware
-app.use(cors({
-    origin: "https://ecomm-fullstack-demo1.netlify.app/",
-    credentials: true
-}));
+const corsOptions = {
+    origin: [
+        "https://ecomm-fullstack-demo1.netlify.app",
+        "https://ecommerce-fullstack-tvzc.onrender.com"
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Content-Range', 'X-Content-Range'],
+    maxAge: 600
+};
+
+app.use(cors(corsOptions));
+
 
 app.use(express.json()); // Parse JSON requests
 
@@ -49,10 +59,11 @@ app.use(session({
         maxAge: 1000 * 60 * 30,
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax'
+        sameSite: 'none' // Changed from 'lax' to 'none' for cross-origin requests
     },
     name: 'my_custom_cookie_name'
 }));
+
 // Middleware to expose user data in responses
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
