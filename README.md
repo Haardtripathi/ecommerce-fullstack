@@ -44,7 +44,22 @@ A comprehensive fullstack ecommerce solution built with modern web technologies.
    Create a `.env` file in the root directory and add the following:
    ```
    MONGODB_URI=your_mongodb_connection_string
-   JWT_SECRET=your_jwt_secret
+   SESSION_SECRET=your_session_secret
+   PORT=5000
+
+   ADMIN=admin_username
+   PASSWORD=admin_password
+   MOBILE=admin_mobile
+   
+   
+   CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+   CLOUDINARY_API_KEY=your_cloudinary_api_key
+   CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+   
+   
+   RAZORPAY_KEY_ID=your_razorpay_keyid
+   RAZORPAY_KEY_SECRET=your_razorpay_key_secret
+
    ```
 
 4. Run the development server:
