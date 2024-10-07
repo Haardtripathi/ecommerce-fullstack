@@ -21,7 +21,7 @@ const app = express();
 
 // CORS configuration
 app.use(cors({
-    origin: "https://mellow-sable-3b6e4c.netlify.app", // Allowed frontend origin
+    origin: "https://enchanting-torrone-2a67a0.netlify.app/", // Allowed frontend origin
     credentials: true, // Required to handle cookies over cross-origin
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
