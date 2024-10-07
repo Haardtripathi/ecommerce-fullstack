@@ -18,7 +18,7 @@ A comprehensive fullstack ecommerce solution built with modern web technologies.
 - Database: MongoDB
 - State Management: Redux
 - Styling: Tailwind CSS
-- Authentication: JWT
+- Authentication: Session Based
 
 ## Getting Started
 
