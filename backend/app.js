@@ -24,8 +24,7 @@ connectDB();
 
 // Middleware
 app.use(cors({
-    origin: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: "https://ecomm-fullstack-demo1.netlify.app/",
     credentials: true
 }));
 
