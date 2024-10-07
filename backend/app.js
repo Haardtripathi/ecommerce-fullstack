@@ -8,6 +8,8 @@ const cors = require("cors");
 require('dotenv').config();
 const path = require("path")
 
+const config = require("./config/config")
+
 // Import User model
 const User = require('./models/user');
 
@@ -21,15 +23,15 @@ const app = express();
 
 // CORS configuration
 app.use(cors({
-    origin: "https://ecommerce-fullstack-frontend-1.onrender.com", // Allowed frontend origin
-    credentials: true, // Required to handle cookies over cross-origin
+    origin: config.FRONTEND_URL,
+    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));
-// Middleware
-app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Credentials', 'true');
+    next();
+});
 
 // MongoDB Store for sessions
 const store = new MongoDBStore({
@@ -37,7 +39,7 @@ const store = new MongoDBStore({
     collection: 'sessions'
 });
 
-// Session middleware
+
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -46,12 +48,20 @@ app.use(session({
     cookie: {
         maxAge: 1000 * 60 * 60 * 24, // 24 hours
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production', // Set to true only in production
-        sameSite: 'none',
-        secure: true
+        secure: true, // Always true since you're using HTTPS
+        sameSite: 'none', // Required for cross-site cookies
+        domain: config.NODE_ENV === 'production' ? '.onrender.com' : 'localhost',
+        path: "/"
     },
     name: 'my_custom_cookie_name'
 }));
+
+// Middleware
+app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+
 
 // Middleware to expose user data in responses
 app.use((req, res, next) => {
