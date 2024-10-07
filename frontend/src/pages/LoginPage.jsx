@@ -35,11 +35,13 @@ const LoginPage = () => {
                 password,
             }, { withCredentials: true });
 
-            window.location.reload(); // Refresh to update auth state
+            // Navigate to home after successful login
+            navigate('/');
         } catch (error) {
             setError(error.response?.data?.message || 'Login failed');
         }
     };
+
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
